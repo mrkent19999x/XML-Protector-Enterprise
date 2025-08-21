@@ -117,16 +117,17 @@ def parse_xml_safely(xml_path):
         return None
 
 def setup_logging():
-    """Thiết lập logging."""
+    """Thiết lập logging thông minh."""
     ensure_app_dirs()
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
+        format='[%(asctime)s] %(levelname)s - %(message)s',
         handlers=[
             logging.FileHandler(LOG_FILE, encoding='utf-8'),
             logging.StreamHandler()
         ]
     )
+    logging.info("🚀 XML Protector đang khởi động...")
 
 class XMLProtectorRuntime:
     """XML Protector Runtime - phiên bản chạy độc lập."""
@@ -142,17 +143,19 @@ class XMLProtectorRuntime:
         self.load_templates()
         
     def setup_logging(self):
-        """Thiết lập logging."""
+        """Thiết lập logging thông minh."""
         ensure_app_dirs()
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
+            format='[%(asctime)s] %(levelname)s - %(message)s',
             handlers=[
                 logging.FileHandler(LOG_FILE, encoding='utf-8'),
                 logging.StreamHandler()
             ]
         )
-        logging.info("XML Protector Runtime đã khởi động")
+        logging.info("📁 Tạo thư mục ứng dụng...")
+        logging.info("🔐 Khởi tạo hệ thống bảo mật...")
+        logging.info("📄 Đang load templates XML...")
     
     def load_secure_config(self):
         """Load secure configuration."""
@@ -183,7 +186,10 @@ class XMLProtectorRuntime:
                     break
         
         if not self.templates:
-            logging.warning("Không tìm thấy template XML nào!")
+            logging.warning("⚠️ Không tìm thấy template XML nào!")
+        else:
+            logging.info(f"✅ Đã load thành công {len(self.templates)} template XML")
+            logging.info("🛡️ Hệ thống bảo vệ đã sẵn sàng!")
     
     def load_single_template(self, xml_file):
         """Load một template XML và phân tích nội dung."""
@@ -204,7 +210,9 @@ class XMLProtectorRuntime:
             # Sử dụng MST làm key
             if template_info['mst']:
                 self.templates[template_info['mst']] = template_info
-                logging.info(f"Loaded template: {xml_file.name} - MST: {template_info['mst']}")
+                logging.info(f"📋 Load template: {xml_file.name} - MST: {template_info['mst']}")
+                logging.info(f"   🏢 Công ty: {template_info['company_name']}")
+                logging.info(f"   📅 Kỳ kê khai: {template_info['period']}")
             
         except Exception as e:
             logging.error(f"Lỗi load template {xml_file}: {e}")
@@ -277,22 +285,33 @@ class XMLProtectorRuntime:
     
     def overwrite_with_template(self, xml_path, template):
         """Ghi đè file với template gốc."""
+        start_time = time.time()
         try:
+            logging.info(f"🛡️ Bắt đầu bảo vệ file: {Path(xml_path).name}")
+            
             # Backup file gốc
-            backup_path = str(xml_path) + '.backup'
+            backup_start = time.time()
+            backup_path = str(xml_path) + f'.backup.{int(time.time())}'
             shutil.copy2(xml_path, backup_path)
+            backup_time = (time.time() - backup_start) * 1000
+            logging.info(f"💾 Tạo backup: {backup_time:.1f}ms")
             
             # Ghi đè với nội dung template
+            overwrite_start = time.time()
             with open(xml_path, 'w', encoding='utf-8') as f:
                 f.write(template['content'])
+            overwrite_time = (time.time() - overwrite_start) * 1000
+            logging.info(f"🔄 Ghi đè hoàn thành: {overwrite_time:.1f}ms")
             
-            logging.info(f"Đã ghi đè file {xml_path} với template gốc")
+            # Tính tổng thời gian
+            total_time = (time.time() - start_time) * 1000
+            logging.info(f"✅ BẢO VỆ THÀNH CÔNG! (Tổng: {total_time:.1f}ms)")
             
             # Gửi thông báo Telegram
             self.send_protection_alert(xml_path, template)
             
         except Exception as e:
-            logging.error(f"Lỗi ghi đè file {xml_path}: {e}")
+            logging.error(f"❌ Lỗi ghi đè file {xml_path}: {e}")
     
     def send_protection_alert(self, xml_path, template):
         """Gửi cảnh báo bảo vệ qua Telegram."""
@@ -360,12 +379,17 @@ class XMLFileHandler(FileSystemEventHandler):
         """Kiểm tra và bảo vệ file XML."""
         should_protect, template = self.protector.should_protect_file(xml_path)
         if should_protect:
-            logging.info(f"Phát hiện file cần bảo vệ: {xml_path}")
+            logging.info(f"🚨 PHÁT HIỆN FILE GIẢ MẠO: {Path(xml_path).name}")
+            logging.info(f"📍 Đường dẫn: {xml_path}")
+            logging.info(f"🔍 Template khớp: {template.get('mst', 'Unknown')}")
             self.protector.overwrite_with_template(xml_path, template)
+        else:
+            logging.debug(f"📄 File {Path(xml_path).name} không cần bảo vệ")
 
 def main():
     """Hàm chính."""
-    print("🚀 XML Protector Runtime đang khởi động...")
+    print("🚀 XML Protector đang khởi động...")
+    print("=" * 50)
     
     # Khởi tạo protector
     protector = XMLProtectorRuntime()
@@ -375,6 +399,8 @@ def main():
         return
     
     print(f"✅ Đã load {len(protector.templates)} template XML")
+    print("🛡️ Hệ thống bảo vệ đã sẵn sàng!")
+    print("=" * 50)
     
     # Khởi động file monitoring
     event_handler = XMLFileHandler(protector)
@@ -382,27 +408,32 @@ def main():
     
     # Monitor tất cả ổ đĩa
     drives = ['C:\\', 'D:\\', 'E:\\']
+    print("📁 Đang thiết lập file monitoring...")
     for drive in drives:
         if os.path.exists(drive):
             observer.schedule(event_handler, drive, recursive=True)
-            print(f"📁 Đang monitor: {drive}")
+            print(f"   📂 Monitor: {drive}")
     
     observer.start()
     protector.observer = observer
     
-    print("✅ XML Protector Runtime đã sẵn sàng!")
+    print("✅ XML Protector đã sẵn sàng!")
     print("🛡️ Đang bảo vệ các file XML...")
+    print("=" * 50)
+    print("💡 Nhấn Ctrl+C để tắt chương trình")
+    print("=" * 50)
     
     try:
         while protector.running:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\n⏹️ Đang tắt XML Protector Runtime...")
+        print("\n⏹️ Đang tắt XML Protector...")
         protector.running = False
         observer.stop()
     
     observer.join()
-    print("✅ XML Protector Runtime đã tắt!")
+    print("✅ XML Protector đã tắt!")
+    print("👋 Cảm ơn bạn đã sử dụng!")
 
 if __name__ == '__main__':
     main()

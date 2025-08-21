@@ -1,0 +1,29 @@
+{
+  "DN001": {
+    "name": "Công ty ABC",
+    "bot_token": "8401477107:AAFZGt57qmTDcxKpgt4QMfPBK7cslUZo4wU",
+    "chat_id": "-1002147483647",
+    "admin_id": 5343328909,
+    "status": "built",
+    "last_build": "2025-08-21 20:00:00",
+    "last_deploy": "2025-08-21 19:45:00"
+  },
+  "DN002": {
+    "name": "Công ty XYZ",
+    "bot_token": "YOUR_BOT_TOKEN_2",
+    "chat_id": "-1002147483647",
+    "admin_id": 5343328909,
+    "status": "pending",
+    "last_build": null,
+    "last_deploy": null
+  },
+  "DN003": {
+    "name": "Công ty DEF",
+    "bot_token": "YOUR_BOT_TOKEN_3",
+    "chat_id": "-1002147483647",
+    "admin_id": 5343328909,
+    "status": "pending",
+    "last_build": null,
+    "last_deploy": null
+  }
+}

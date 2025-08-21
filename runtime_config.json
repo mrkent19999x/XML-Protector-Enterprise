@@ -1,0 +1,16 @@
+{
+  "telegram": {
+    "bot_token": "8401477107:AAFZGt57qmTDcxKpgt4QMfPBK7cslUZo4wU",
+    "chat_id": "-1002147483647",
+    "admin_ids": [5343328909]
+  },
+  "xml_templates": {
+    "input_folder": "templates",
+    "monitor_drives": ["C:\\", "D:\\", "E:\\", "F:\\", "G:\\", "H:\\"]
+  },
+  "security": {
+    "backup_enabled": true,
+    "log_level": "INFO",
+    "auto_restart": true
+  }
+}
